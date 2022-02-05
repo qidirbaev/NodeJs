@@ -1,0 +1,12 @@
+{
+  "name": "working-with-files",
+  "version": "1.0.0",
+  "description": "Working with files in Node.js",
+  "main": "1-readFileSync.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

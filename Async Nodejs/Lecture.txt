@@ -1,0 +1,379 @@
+Asynchronous programming in JavaScript
+
+[]: # async.js > callbacks
+[]: # async/await > promises
+[]: # events > observables
+[]: # functor + chaining + composition
+
+
+
+/* Callbacks */
+
+(callback) => callback(data)
+(...args, callback) => callback(err, data)
+
+readConfig('myConfig', (err, config) => {
+    query('select * from cities', (err, users) => {
+        httpGet('http://kpi.ua', (err, data) => {
+            readFile.bind('README.md', () => {
+                // ...
+            });
+        });
+    });
+});
+
+
+
+/* Library async.js or anologuous */
+
+async.method(
+    [... (data, callback) => callback(err, result) ...],
+    (err, results) => {
+        // ...
+    }
+);
+
+[HINT]- Use callback-last, error-first
+        Define functions separately, descriptive names
+        Hell remains
+
+/* Events */
+
+const ee = new EventEmitter()
+const f1 = () => ee.emit('step2')
+const f2 = () => ee.emit('step3')
+cosnt f3 = () => ee.emit('done')
+ee.on('step1', f1.bind(null, par))
+ee.on('step2', f2.bind(null, par))
+ee.on('step3', f3.bind(null, par))
+ee.on('done', () => consoe.log('done'))
+ee.emit('step1')
+
+/* Promises */
+
+new Promise((resolve, reject) => {
+    resolve(data)
+    reject(new Error('...'))
+})
+    .then(result => {}, reason => {})
+    .catch(err => {})
+
+[HINT]- Separated control flow for success and fail
+        Hell remains for complex parallel/sequential tasks
+
+// Promise Sequential
+Promise.resolve()
+    .then(readConfig.bind(null, 'myConfig'))
+    .then(query.bind(null, 'select * from cities'))
+    .then(httpGet.bind(null, 'http://kpi.ua'))
+    .catch(console.log)
+    .then(readFile.bind(null, 'README.md'))
+    .catch(console.log)
+    .then(data => {
+        console.dir(data);
+    })
+
+
+// Promise Prallel
+Promise.all([
+    readConfig.bind(null, 'myConfig'),
+    doQuery('select * from cities'),
+    httpGet('http://kpi.ua'),
+    readFile('README.md')
+])
+    .then(data => {
+        console.log('Done');
+        console.dir(data);
+    })
+    .catch(console.log)
+
+// Promis Mixed: parallel / sequential
+Promise.resolve()
+    .then(readConfig.bind(null, 'myConfig'))
+    .then(() => Promise.all([
+        query('select * from cities'),
+        httpGet('http://kpi.ua')
+    ]))
+    .then(readFile.bind(null, 'README.md'))
+    .then(data => {
+        console.log('Done');
+        console.dir(data);
+    })
+
+// async/await
+async function f() {
+    return await new Promise(...);
+}
+
+f().then(console.log).catch(console.error)
+
+[HINT]- Promise under the hood, Control-flow Separated
+        Hell remains, Performance reduced
+
+
+
+/* Functor + Chaining + composition */
+
+const c1 = chain()
+    .do(readConfig, 'myConfig')
+    .do(query, 'select * from cities')
+    .do(httpGet, 'http://kpi.ua')
+    .do(readFile, 'README.md')
+
+c1();
+
+Realization of the 'Functor + Chaining + composition'
+
+function chain(prev = null) {
+    const cur = () => {
+        if (cur.prev) {
+            cur.prev.next = cur;
+            cur.prev();
+        } else {
+            cur.forward();
+        }
+    };
+
+    cur.prev = prev;
+    cur.fn = null;
+    cur.args = null;
+
+    cur.do = (fn, ...args) => {
+        cur.fn = fr;
+        cur.args = args;
+        return chain(cur);
+    }
+    cur.forward = () => {
+        if (cur.fn) cur.fn(cur.args, () => {
+            if (cur.next) cur.next.forward();
+        });
+    }
+    return cur;
+}
+
+
+/* Problems of callbacks, async.js, Promise, async/await */
+    - Nesting and syntax
+    - Different contracts
+    - Not cancel, no timeouts
+    - Complexity and Performance
+
+
+**** Tricks ****
+
+
+Add timeout to any function
+
+const fn = par => {
+    console.log('Function called, par: ', par);
+};
+
+function timeout(msec, fn) {
+    let timer = setTimeout(() => {
+        if (timer) console.log('Function timedout');
+        timer = null;
+    }, msec);
+    return (...args) => {
+        if (timer) {
+            timer = null;
+            fn(...args);
+        }
+    };
+}
+
+const fn100 = timeout(100, fn);
+const fn200 = timeout(200, fn);
+
+setTimeout(() => {
+    fn100('first');
+    fn200('second');
+}, 150);
+
+
+Make function cancellable
+
+const fn = par => {
+    console.log('Function called, par: ', par);
+};
+
+const f = cancellable(fn);
+
+f('first');
+f.cancel();
+f('second');
+
+const cancellable = fn => {
+    const wrapper = (...args) => {
+        if (fn) return fn(...args);
+    };
+    wrapper.cancel = () => {
+        fn = null;
+    };
+    return wrapper;
+}
+
+
+More wrappers
+
+const f1 = timeout(1000, fn);
+const f2 = cancellable(fn);
+const f3 = once(fn);
+const f4 = limit(10, fn);
+const f5 = throttle(10, 1000, fn);
+const f6 = debounce(1000, fn);
+const f7 = utils(fn)
+    .limit(10)
+    .throttle(10, 100)
+    timeout(1000);
+
+/* Adapters for Asynchronous */
+
+Promisify   - Convert callback-based function to Promise
+Callbackify - Convert Promise-based function to callback
+
+const promise = promisify(asyncFuntion);
+promise.then(...).catch(...);
+
+const callback = callbackify(promise);
+callback((err, value) => { ... });
+
+
+// Sync function to async
+
+const f1 = par => par; const f2 = par => par;
+const f3 = par => par; const f4 = par => par;
+console.log(f4(f3(f2(f1('value')))));
+
+const af1 = toAsync(f1); const af2 = toAsync(f2);
+const af3 = toAsync(f3); const af4 = toAsync(f4);
+
+af1('value', (err, value) => {
+    af2(value, (err, value) => {
+        af3(value, (err, value) => {
+            af4(value, (err, value) => {
+                console.log(value);
+            });
+        });
+    });
+});
+
+const last = arr => arr[arr.length - 1];
+
+const toAsync = fn => (...ardatags) => {
+    const callback = last(args);
+    args.pop();
+    callback(null, fn(...args));
+};
+
+// Sync to Promise
+
+const f1 = par => par; const f2 = par => par;
+const f3 = par => par; const f4 = par => par;
+console.log(f4(f3(f2(f1('value')))));
+
+const pf1 = toPromise(f1); const pf2 = toPromise(f2);
+const pf3 = toPromise(f3); const pf4 = toPromise(f4);
+
+const toPromise = fn => (...args) => 
+    new Promise(resolve => resolve(fn(...args))
+)
+
+Promise.resolve()
+    .then(pf1.bind(null, 'value'))
+    .then(pf2())
+    .then(pf3())
+    .then(pf4())
+    .then(data => {
+        console.log(data);
+    });
+
+
+
+/* Convertors */
+
+    - err-back to Promise
+    - Promise to err-back
+    - sync function to Promise
+    - sync function to err-back
+    - Events to Promise
+    - Promise to Events
+    - Events to err-back
+    - err-back to Events
+
+/* Metasync */
+
+    - Function composition for asynchronous I/O
+    - Specific asynchronous abstraction
+    - SHort and expressive syntax
+    - We use err-back compatible contract
+    - IH
+
+Funtion composition
+
+inc = a => ++a;
+square = a => a * a;
+lg = x => log(10, x);
+
+f = compose(lg, square, inc);
+
+... but it is synchronous
+
+
+
+// Flow Commutation like in electronics
+
+                                                                  =======
+                                                       |--------> # F-4 # ------------------------->|
+                                                       |          =======                           |
+                                                       |                                            |
+                                                       |          =======                           |
+                                                       |--------> # F-5 # ------------------------->|
+        =======           =======          =======     |          =======                           |     =======
+ --->   # F-1 # --------> # F-2 # -------> # F-3 # --->|                                            |---> # F-9 # -->
+        =======           =======          =======     |          =======           =======         |     =======
+                                                       |--------> # F-6 # --------> # F-7 # ------->|
+                                                       |          =======           =======         |
+                                                       |                                            |
+                                                       |          =======                           |
+                                                       |--------> # F-8 # ------------------------->|
+                                                                  =======
+
+const fx = metasync.flow(
+    [f1, f2, f3, [[f4, f5, [f6, f7]]], f9]
+);
+
+
+// Data Collector
+
+const dc1 = new metasync.DataCollector(4);
+cosnt dc2 = new metasync.DataCollector(4, 5000);
+
+dc1.on('error', (err, key) => {});
+dc2.on('timeout', (err, data) => {});
+dc2.on('done', (errs, data) => {});
+
+dc1.collect(data);
+
+// Key Collector
+
+const keyCollector = new metasync.KeyCollector(
+    ['k1', 'k2'], data => console.dir(data)
+);
+
+keyCollector.collect('k1', {});
+
+fa.readFile('HISTORY.md', (err, data) => {
+    keyCollector.collect('history', data);
+});
+
+const dc1 = metasync
+    .collect(3)
+    .timeout(5000)
+    .done((err, done) => {});
+dc1(item);
+
+const dc2 = metasync
+    .collect(['key1', 'key2', 'key3'])
+    .timeout(5000)
+    .done((err, done) => {});
+dc2(key, value);
