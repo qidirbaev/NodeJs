@@ -33,3 +33,6 @@ socket.connect({
 
     wait(2000).then(() => send());
 });
+
+// IN NODEJS THERE IS NO WAY TO 
+// BROADCAST MESSAGE TO ALL CLIENTS BY DEFAULT
