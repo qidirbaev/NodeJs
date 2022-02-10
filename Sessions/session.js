@@ -8,7 +8,7 @@ const ALPHA_LOWER = 'abcdefghijklmnopqrstuvwxyz';
 const ALPHA = ALPHA_UPPER + ALPHA_LOWER;
 const DIGIT = '0123456789';
 const ALPHA_DIGIT = ALPHA + DIGIT;
-const a = 124;
+
 const generateToken = () => {
     const base = ALPHA_DIGIT.length;
     let key = '';

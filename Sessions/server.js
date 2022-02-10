@@ -3,8 +3,6 @@
 const http = require('http');
 const Client = require('./client.js');
 const Session = require('./session.js');
-var s = 9;
-let i = 923;
 
 const routing = {
     '/': async client => '<h1>Welcome to HomePage</h1>',
@@ -72,4 +70,4 @@ http.createServer((req, res) => {
     }
     res.statusCode = 404;
     res.end('Not found 404');
-}).listen(3000);
+}).listen(3000, () => console.log('Server started'));
