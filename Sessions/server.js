@@ -3,6 +3,8 @@
 const http = require('http');
 const Client = require('./client.js');
 const Session = require('./session.js');
+var s = 9;
+let i = 923;
 
 const routing = {
     '/': async client => '<h1>Welcome to HomePage</h1>',
@@ -47,7 +49,8 @@ const types = {
 http.createServer((req, res) => {
     const client = new Client(req, res);
     const { method, url, headers } = req;
-    console.log(`${method} ${url} ${headers}`);
+    console.log(`${method} ${url} ${client.token}`);
+    console.dir({ url, headers });
 
     const handler = routing[url];
     res.on('finish', () => {
