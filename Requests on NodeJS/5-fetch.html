@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fetch Client</title>
+</head>
+<body>
+    <div id="message"></div>
+    <hr>
+    <button id="btn">Send Request</button>
+    <script>
+        const message = document.getElementById('message');
+        const btn = document.getElementById('btn');
+        const xhr = new XMLHttpRequest();
+
+        const fetch = url => new Promise((resolve, reject) => {
+            xhr.onreadystatechange = function() {
+                if (this.readyState === XMLHttpRequest.DONE) {
+                    if (this.status === 200) resolve(this.responseText);
+                    else reject(`Status: ${this.status}`);
+                }
+            };
+            xhr.open('GET', url, true);
+            xhr.send();
+        });
+
+        btn.addEventListener('click', () => {
+            fetch('/person')
+                .then(data => message.innerHTML = data)
+                .catch(err => message.innerHTML = err);
+        });
+    </script>
+</body>
+</html>
