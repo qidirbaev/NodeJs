@@ -8,14 +8,18 @@ const PATH = `${__dirname}/Sessions`;
 
 const safePath = fn => (token, ...args) => {
     const callback = args[args.length - 1];
-    if (typeof token != 'string') return (
-        callback || console.error)('Token must be a string');
+    if (typeof token != 'string') {
+        callback('Token must be a string');
+        return;
+    }
     
     const fileName = path.join(PATH, token);
-    if (!fileName.startsWith(PATH)) return (
-        callback || console.error)(new Error('Token is not valid'));
+    if (!fileName.startsWith(PATH)) {
+        callback(new Error('Token is not valid'));
+        return;
+    }
     
-    fn(fileName, ...args);
+    fn(`${fileName}.session`, ...args);
 };
 
 // safePath(fs.readFile)('token', 'utf8');
@@ -27,10 +31,16 @@ const deleteSession = safePath(fs.unlink);
 class Storage extends Map {
     get(key, callback) {
         const value = super.get(key); // for cached value
-        if (value) return callback(null, value);
+        if (value) {
+            callback(null, value);
+            return;
+        }
         
         readSession(key, (err, data) => {
-            if (err) return callback(err);
+            if (err) {
+                callback(err);
+                return;
+            }
             console.log(`Session loaded: ${key}`);
             const session = v8.deserialize(data);
             super.set(key, session);
@@ -55,4 +65,4 @@ class Storage extends Map {
     }
 }
 
-module.exports = Storage;
+module.exports = new Storage();

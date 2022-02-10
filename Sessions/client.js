@@ -41,8 +41,7 @@ class Client {
 
     setCookie(name, val, httpOnly = false) {
         const { host } = this;
-        const name = "BEGZAT";
-        const bool = ["hello", 123, true]; // this line
+        
         const expires = `expires=${COOKIE_EXPIRES}`;
         let cookie = `${name}=${val}; ${expires}; Path=/; Domain=${host}`;
         if (httpOnly) cookie += '; HttpOnly';
@@ -58,7 +57,7 @@ class Client {
         // console.dir({ preparedCookie, headersSent: res.headersSent });
         if (preparedCookie.length && !res.headersSent) {
             console.dir({ preparedCookie });
-            res.setHeader('Set-Header', preparedCookie);
+            res.setHeader('Set-Cookie', preparedCookie);
         }
     }
 }

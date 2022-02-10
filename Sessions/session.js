@@ -32,15 +32,16 @@ class Session extends Map {
         const session = new Session(token);
         client.session = session;
         client.setCookie('token', token);
-        storage.setCookie(token, session);
+        storage.set(token, session);
         return session;
     }
 
     static restore(client) {
         const { cookie } = client;
+        console.log('clientCookie', cookie);
         const sessionToken = cookie.token;
         if (sessionToken) {
-            generateToken(sessionToken, (err, session) => {
+            storage.get(sessionToken, (err, session) => {
                 if (session) {
                     Object.setPrototypeOf(session, Session.prototype);
                     client.token = sessionToken;
@@ -52,6 +53,7 @@ class Session extends Map {
 
     static delete(client) {
         const { token } = client;
+        console.log('delete', token);
         if (token) {
             storage.delete(token);
             client.deleteCookie(token);

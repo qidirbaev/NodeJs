@@ -8,7 +8,7 @@ const routing = {
     '/': async client => '<h1>Welcome to HomePage</h1>',
     '/start': async client => {
         Session.start(client);
-        return `Session token is ${client.token}`;
+        return `<pre>Session token is <b>${client.token}</b></pre>`;
     },
     '/destroy': async client => {
         const result = `Session destroyed: ${client.token}`;
@@ -41,14 +41,19 @@ const types = {
     object: JSON.stringify,
     string: str => str,
     number: num => num.toString(),
-    undefined: () => 'undefined',
+    undefined: () => 'Not found'
 };
+
+// clear console
+process.stdout.write('\x1B[2J\x1B[0f');
 
 http.createServer((req, res) => {
     const client = new Client(req, res);
-    const { method, url, headers } = req;
+
+    console.dir({ clientToken: client.token });
+    
+    const { method, url } = req;
     console.log(`${method} ${url} ${client.token}`);
-    console.dir({ url, headers });
 
     const handler = routing[url];
     res.on('finish', () => {
