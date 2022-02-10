@@ -38,22 +38,23 @@ class Session extends Map {
 
     static restore(client) {
         const { cookie } = client;
-        console.log('clientCookie', cookie);
+        if (!cookie) return;
         const sessionToken = cookie.token;
         if (sessionToken) {
-            storage.get(sessionToken, (err, session) => {
-                if (session) {
+            return new Promise((resolve, reject) => {
+                storage.get(sessionToken, (err, session) => {
+                    if (err) return reject(new Error('No session'));
                     Object.setPrototypeOf(session, Session.prototype);
                     client.token = sessionToken;
                     client.session = session;
-                }
+                    resolve(session);
+                });
             });
         }
     }
 
     static delete(client) {
         const { token } = client;
-        console.log('delete', token);
         if (token) {
             storage.delete(token);
             client.deleteCookie(token);

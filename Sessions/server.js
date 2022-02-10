@@ -49,11 +49,8 @@ const types = {
 // clear console
 process.stdout.write('\x1B[2J\x1B[0f');
 
-http.createServer((req, res) => {
-    const client = new Client(req, res);
-
-    console.dir({ clientToken: client.token });
-    
+http.createServer(async (req, res) => {
+    const client = await new Client.getInstance(req, res);
     const { method, url } = req;
     console.log(`${method} ${url} ${client.token}`);
 

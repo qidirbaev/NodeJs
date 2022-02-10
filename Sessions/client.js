@@ -23,7 +23,12 @@ class Client {
         this.host = parseHost(req.headers.host);
         this.preparedCookie = [];
         this.parseCookie();
-        Session.restore(this);
+    }
+
+    async static getInstance(req, res) {
+        const client = new Client(req, res);
+        await Session.restore(client);
+        return client;
     }
 
     parseCookie() {
