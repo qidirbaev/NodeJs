@@ -17,7 +17,7 @@ const routing = {
     },
     '/api/method1': async client => {
         if (client.session) {
-            client.session.result('method1', 'called');
+            console.log('method1', 'called');
             return { data: 'example data' };
         } else {
             return { data: 'access denied' };
@@ -29,9 +29,11 @@ const routing = {
     }),
     '/api/method3': async client => {
         if (client.session) {
-            return client.session.entries().map((key, value) => {
+            const sessions = client.session.entries().map((key, value) => {
                 return `<b>${key}</b>: ${value}<br>`;
-            }).join();
+            }).join('');
+            console.log({ sessions });
+            return `<h1>Sessions</h1><pre>${sessions}</pre>`;
         } 
         return 'No session found';
     }
