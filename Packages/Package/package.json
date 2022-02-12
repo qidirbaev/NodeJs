@@ -1,0 +1,8 @@
+{
+    "name": "modeule-1",
+    "versions": "1.0.0",
+    "author": {
+        "name": "Begzat Kidirbaev"
+    },
+    "main": "main.js"
+}
