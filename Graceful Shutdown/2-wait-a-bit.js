@@ -1,0 +1,75 @@
+"use strict";
+
+const http = require("http");
+const connections = new Map();
+
+const SERVER_PORT = 3000;
+const LONG_RESPONSE_TIME = 50000;
+const SHUTDOWN_TIMEOUT = 5000;
+
+const server = http.createServer((req, res) => {
+    console.log("New Request");
+    connections.set(res.connection, res);
+    setTimeout(() => {
+        res.end("Example response");
+    }, LONG_RESPONSE_TIME);
+});
+
+server.on("connection", socket => {
+    console.log("New Connection");
+    socket.on("close", () => {
+        console.log("Connection Closed");
+        connections.delete(socket);
+    });
+});
+
+server.listen(SERVER_PORT, () => {
+    console.log(`Server listening on port ${SERVER_PORT}`);
+});
+
+const showSockets = () => {
+    console.log("Connection: " + connections.size);
+    for (const connection of connections.keys()) {
+        const { remoteAddress, remotePort } = connection;
+        console.log(` ${remoteAddress}:${remotePort}`);
+    }
+};
+
+const closeSockets = () => {
+    for (const [socket, res] of connections.entries()) {
+        connections.delete(socket);
+        res.end("Closing socket");
+        socket.end();
+    }
+};
+
+const freeResources = callback => {
+    console.log("Freeing resources");
+    callback();
+};
+
+const gracefulShutdown = callback => {
+    server.close(err => {
+        if (err) {
+            console.log(err);
+            process.exit(1);
+        }
+    });
+    setTimeout(() => {
+        freeResources(() => {
+            closeSockets();
+            callback();
+        });
+    }, SHUTDOWN_TIMEOUT);
+};
+
+process.on("SIGINT", () => {
+    console.log();
+    console.log("Gracefully shutting down from SIGINT (Ctrl-C)");
+    showSockets();
+    gracefulShutdown(() => {
+        showSockets();
+        console.log("Exited");
+        process.exit(0);
+    });
+});
