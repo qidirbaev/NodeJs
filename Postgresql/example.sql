@@ -31,7 +31,7 @@ CREATE TABLE Session (
   Id		serial,
   UserId	integer NOT NULL,
   Token		varchar(64) NOT NULL,
-  IP		varchar(64) NOT NULL
+  IP		varchar(64) NOT NULL,
   Data		text
 );
 
