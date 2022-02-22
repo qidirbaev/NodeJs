@@ -1,0 +1,24 @@
+Why use caching:
+    1. Reduced server load - Ishlov berish ko'p vaqt oluvchi so'rov natijalari yozib olinadi va keyingi so'rovlarga natijalari yuboriladi.
+    2. Increased reliability - Bir hil so'rovlarga javoblarni aynan bir-hil bo'lishi.
+    3. Decreased network costs - So'rovlarga javobning kesh xotirada mavjudligi tufayli, tarmoq so'rovlari soni kamayishi.
+    4. Improved database performance - Ma'lumotlar bazasiga ulanishlarning va so'rovlarning kamayishi.
+    5. Increased availability of content - Tarmoqdagi nosozlik tufayli yo'qotilgan ma'lumotlarning keshda saqlanganligan foydalanish.
+
+Caching solutions:
+    1. In-process Caching with Node-cache - Kesh-xotira sifatida kalit-va-qiymat juftliklarini qabul qiluvchi yagona obiekt olinadi. (Maksimum kalitlar soni 1 million)
+    2. In-memory Caching with Redis - Kesh-ma'lumotlar-bazasi sifatida bir qancha ma'lumotlar tuzilmalari va ular ustida atomik opertatorlarni bajarishni ta'minlaydi.
+
+Caching data access patterns:
+    1. Cache-aside pattern - So'rov avval kesh-xotiradan agar topilmasa ma'lumotlar bazasiga yuboriladi.
+    2. Read-through pattern - So'rov doyim kesh-xotiradan so'raladi agar topilmasa kelajakda foydalanish ma'lumotlar bazasidan so'raladi va kesh xotiraga saqlanadi.
+    3. Write-through pattern - Har qanday yangi so'rov kesh-xotiraga yozish uchun yuboriladi va kesh-xotiradagi triggerlar esa ma'lumotlar bazasiga saqlash uchun yuboradi.
+    4. Write-behind pattern - Yuborilgan so'rov kesh-xotiraga yozish uchun yuboriladi va tranzaksiya tugaganidan keyin (bir necha soniya yoki kunlar) ma'lumotlar bazasiga yoziladi.
+    5. Refresh-ahead pattern - Tez-tez so'ralgan so'rovlar kesh-xotiradan o'chirilmasidan avval ma'lumotlar bazasini yangilaydi.
+
+Cache Eviction Policy:  // Keshni ko'chirish (kesh-xotirani yangilash) qoidalari
+    1. Least Recently Used (LRU) [NPM: lru-cache] - Kesh xotira stek tarzida bo'ladi. Oxirgi so'ralgan so'rov natijalari stekning yuqori qismiga joylashtiriladi, so'rov kelganida so'rov-obiektidagi vaqt ko'satkichini oshirib boradi.
+    2. Least Frequently Used (LFU) - So'rov yuborilgan kesh-obiektidagi ko'rsatkich oshiriladi va stekning yuqorgi pog'onasiga qo'yiladi.
+    3. Most Recently Used (MRU) - (Teskari LRU) Eng so'ngi foydalanilgan kesh-obiektini olib tashlaydi.
+    4. First In, First Out (FIFO) - (Queue) Kesh eng birinchi joylangan obiekt o'chiriladi.
+
